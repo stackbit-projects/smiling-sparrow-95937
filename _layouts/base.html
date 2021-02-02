@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+    <head>    
+
+        <title>{% assign title_is_not_empty = page.seo.title | is_not_empty %}{% if title_is_not_empty %}{{ page.seo.title }}{% else %}{{ page.title | append: ' | ' | append: site.title }}{% endif %}</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="google" content="notranslate" />
+        <meta name="description" content="{{ page.seo.description | default: '' }}" />
+        {% assign robots_is_not_empty = page.seo.robots | is_not_empty %}
+        {% if robots_is_not_empty %}
+        <meta name="robots" content="{{ page.seo.robots | join: ',' }}">
+        {% endif %}
+        {% assign canonical_url_is_not_empty = page.seo.canonical_url | is_not_empty %}
+        {% assign domain_is_not_empty = site.domain | is_not_empty %}
+        {% if canonical_url_is_not_empty %}
+        <link rel="canonical" href="{{ page.seo.canonical_url }}" />
+        {% elsif domain_is_not_empty %}
+          {% assign domain = site.domain | trim: '/' %}
+          {% assign page_rel_url = page.url | relative_url %}
+          <link rel="canonical" href="{{ domain | append: page_rel_url }}" />
+        {% endif %}
+        {% for meta in page.seo.extra %}
+          {% if meta.name == 'og:image' or meta.name == 'twitter:image' %}
+            {% assign expr_1 = meta.value | starts_with: 'http' %}
+            {% assign domain_is_not_empty = site.domain | is_not_empty %}
+            {% if expr_1 %}
+            <meta {% assign expr_2 = meta.name | starts_with: 'og:' %}{% if expr_2 %}property="{{ meta.name }}"{% else %}name="{{ meta.name }}"{% endif %} content="{{ meta.value }}">
+            {% elsif domain_is_not_empty %}
+              {% assign domain = site.domain | trim: '/' %}
+              {% assign image_rel_url = meta.value | relative_url %}
+              <meta {% assign expr_3 = meta.name | starts_with: 'og:' %}{% if expr_3 %}property="{{ meta.name }}"{% else %}name="{{ meta.name }}"{% endif %} content="{{ domain | append: image_rel_url }}">
+            {% endif %}
+          {% else %}
+            <meta {% assign expr_4 = meta.name | starts_with: 'og:' %}{% if expr_4 %}property="{{ meta.name }}"{% else %}name="{{ meta.name }}"{% endif %} content="{{ meta.value }}">
+          {% endif %}
+        {% endfor %}
+        {% assign font = site.base_font | default: 'nunito-sans' %}
+        {% if font != 'system-sans' %}
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        {% endif %}
+        {% if font == 'nunito-sans' %}
+        <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+        {% elsif font == 'fira-sans' %}
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+        {% endif %}
+        <link rel="stylesheet" href="{{ 'assets/css/main.css' | relative_url }}">
+        {% assign favicon_is_not_empty = site.favicon | is_not_empty %}
+        {% if favicon_is_not_empty %}
+        <link rel="icon" href="{{ site.favicon | relative_url }}">
+        {% endif %}
+        
+    </head>
+    <body class="palette-{{ site.palette }} font-{{ site.base_font }}">
+        
+        {{ content }}
+        <!-- Scripts -->
+        <script src="{{ 'js/plugins.js' | relative_url }}"></script>
+        <script src="{{ 'js/init.js' | relative_url }}"></script>
+        <script src="{{ 'js/main.js' | relative_url }}"></script>
+    </body> 
+</html>
